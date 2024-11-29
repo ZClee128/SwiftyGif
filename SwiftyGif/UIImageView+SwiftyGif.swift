@@ -147,6 +147,16 @@ public extension UIImageView {
             return nil
         }
         
+        if let data =  manager.staticGraphCache[url] {
+            self.parseDownloadedGif(url: url,
+                    data: data,
+                    error: nil,
+                    manager: manager,
+                    loopCount: loopCount,
+                    levelOfIntegrity: levelOfIntegrity)
+            return nil
+        }
+        
         stopAnimatingGif()
         
         let loader: UIView? = showLoader ? createLoader(from: customLoader) : nil
@@ -214,6 +224,8 @@ public extension UIImageView {
             startAnimatingGif()
             delegate?.gifURLDidFinish?(sender: self)
         } catch {
+            manager.staticGraphCache[url] = data
+            self.image = UIImage(data: data)
             report(url: url, error: error)
         }
     }

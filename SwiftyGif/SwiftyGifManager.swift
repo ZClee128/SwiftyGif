@@ -33,6 +33,7 @@ open class SwiftyGifManager {
     fileprivate var memoryLimit: Int
     open var haveCache: Bool
     open var remoteCache : [URL : Data] = [:]
+    open var staticGraphCache : [URL : Data] = [:]
 #if swift(>=4.2)
     public var mode: RunLoop.Mode = .common
 #else
