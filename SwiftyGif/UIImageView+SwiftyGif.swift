@@ -11,7 +11,7 @@ import UIKit
     @objc optional func gifDidStart(sender: UIImageView)
     @objc optional func gifDidLoop(sender: UIImageView)
     @objc optional func gifDidStop(sender: UIImageView)
-    @objc optional func gifURLDidFinish(sender: UIImageView)
+    @objc optional func gifURLDidFinish(sender: UIImageView, url: URL)
     @objc optional func gifURLDidFail(sender: UIImageView, url: URL, error: Error?)
 }
 
@@ -218,7 +218,7 @@ public extension UIImageView {
             manager.remoteCache[url] = data
             setGifImage(image, manager: manager, loopCount: loopCount)
             startAnimatingGif()
-            delegate?.gifURLDidFinish?(sender: self)
+            delegate?.gifURLDidFinish?(sender: self, url: url)
         } catch {
             manager.staticGraphCache[url] = data
             manager.deleteImageView(self)
