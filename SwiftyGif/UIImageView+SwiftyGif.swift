@@ -148,12 +148,8 @@ public extension UIImageView {
         }
         
         if let data =  manager.staticGraphCache[url] {
-            self.parseDownloadedGif(url: url,
-                    data: data,
-                    error: nil,
-                    manager: manager,
-                    loopCount: loopCount,
-                    levelOfIntegrity: levelOfIntegrity)
+            manager.deleteImageView(self)
+            self.image = UIImage(data: data)
             return nil
         }
         
@@ -225,6 +221,7 @@ public extension UIImageView {
             delegate?.gifURLDidFinish?(sender: self)
         } catch {
             manager.staticGraphCache[url] = data
+            manager.deleteImageView(self)
             self.image = UIImage(data: data)
             report(url: url, error: error)
         }
