@@ -22,7 +22,7 @@ public extension UIImageView {
     /// - Parameter gifImage: The UIImage containing the gif backing data
     /// - Parameter manager: The manager to handle the gif display
     /// - Parameter loopCount: The number of loops we want for this gif. -1 means infinite.
-    func setImage(_ image: UIImage, manager: SwiftyGifManager = .defaultManager, loopCount: Int = -1, autoPlay: Bool) {
+    func setImage(_ image: UIImage, manager: SwiftyGifManager = .defaultManager, loopCount: Int = -1, autoPlay: Bool = true) {
         if let _ = image.imageData {
             setGifImage(image, manager: manager, loopCount: loopCount, autoPlay: autoPlay)
         } else {
@@ -40,7 +40,7 @@ public extension UIImageView {
     ///
     /// - Parameter gifImage: The UIImage containing the gif backing data
     /// - Parameter manager: The manager to handle the gif display
-    convenience init(gifImage: UIImage, manager: SwiftyGifManager = .defaultManager, loopCount: Int = -1, autoPlay: Bool) {
+    convenience init(gifImage: UIImage, manager: SwiftyGifManager = .defaultManager, loopCount: Int = -1, autoPlay: Bool = true) {
         self.init()
         setGifImage(gifImage,manager: manager, loopCount: loopCount, autoPlay: autoPlay)
     }
@@ -59,7 +59,7 @@ public extension UIImageView {
     /// WARNING : this overwrite any previous gif.
     /// - Parameter gifImage: The UIImage containing the gif backing data
     /// - Parameter loopCount: The number of loops we want for this gif. -1 means infinite.
-    @objc func setGifImage(_ gifImage: UIImage, loopCount: Int = -1, autoPlay: Bool) {
+    @objc func setGifImage(_ gifImage: UIImage, loopCount: Int = -1, autoPlay: Bool = true) {
         if let imageData = gifImage.imageData, (gifImage.imageCount ?? 0) < 1 {
             image = UIImage(data: imageData)
             return
@@ -93,7 +93,7 @@ public extension UIImageView {
     /// - Parameter gifImage: The UIImage containing the gif backing data
     /// - Parameter manager: The manager to handle the gif display
     /// - Parameter loopCount: The number of loops we want for this gif. -1 means infinite.
-    func setGifImage(_ gifImage: UIImage, manager: SwiftyGifManager = .defaultManager, loopCount: Int = -1, autoPlay: Bool) {
+    func setGifImage(_ gifImage: UIImage, manager: SwiftyGifManager = .defaultManager, loopCount: Int = -1, autoPlay: Bool = true) {
         if let imageData = gifImage.imageData, (gifImage.imageCount ?? 0) < 1 {
             image = UIImage(data: imageData)
             return
@@ -140,7 +140,7 @@ public extension UIImageView {
                        session: URLSession = URLSession.shared,
                        showLoader: Bool = true,
                        customLoader: UIView? = nil,
-                       autoPlay: Bool = true) -> URLSessionDataTask? {
+                       autoPlay: Bool = true,
                        callback: @escaping (Result<Data, Error>) -> Void = {_ in }
     ) -> URLSessionDataTask? {
         
@@ -150,15 +150,13 @@ public extension UIImageView {
                     error: nil,
                     manager: manager,
                     loopCount: loopCount,
-                    levelOfIntegrity: levelOfIntegrity, autoPlay: autoPlay)
+                                    levelOfIntegrity: levelOfIntegrity, autoPlay: autoPlay, callback: callback)
             return nil
         }
         
         if let data =  manager.staticGraphCache[url] {
             manager.deleteImageView(self)
             self.image = UIImage(data: data)
-                    levelOfIntegrity: levelOfIntegrity,
-                    callback: callback)
             return nil
         }
         
@@ -174,9 +172,7 @@ public extension UIImageView {
                                         error: error,
                                         manager: manager,
                                         loopCount: loopCount,
-                                         levelOfIntegrity: levelOfIntegrity, autoPlay: autoPlay)
-                                        levelOfIntegrity: levelOfIntegrity,
-                                        callback: callback)
+                                         levelOfIntegrity: levelOfIntegrity, autoPlay: autoPlay, callback: callback)
             }
         }
         
@@ -219,7 +215,7 @@ public extension UIImageView {
                                     manager: SwiftyGifManager,
                                     loopCount: Int,
                                     levelOfIntegrity: GifLevelOfIntegrity,
-                                    autoPlay: Bool) {
+                                    autoPlay: Bool = true,
                                     callback: (Result<Data, Error>) -> Void) {
         guard let data = data else {
             report(url: url, error: error)
@@ -235,9 +231,6 @@ public extension UIImageView {
                 startAnimatingGif()
             }
             delegate?.gifURLDidFinish?(sender: self, url: url)
-            setGifImage(image, manager: manager, loopCount: loopCount)
-            startAnimatingGif()
-            delegate?.gifURLDidFinish?(sender: self)
             callback(.success(data))
         } catch {
             manager.staticGraphCache[url] = data
