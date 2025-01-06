@@ -22,9 +22,9 @@ public extension UIImageView {
     /// - Parameter gifImage: The UIImage containing the gif backing data
     /// - Parameter manager: The manager to handle the gif display
     /// - Parameter loopCount: The number of loops we want for this gif. -1 means infinite.
-    func setImage(_ image: UIImage, manager: SwiftyGifManager = .defaultManager, loopCount: Int = -1) {
+    func setImage(_ image: UIImage, manager: SwiftyGifManager = .defaultManager, loopCount: Int = -1, autoPlay: Bool) {
         if let _ = image.imageData {
-            setGifImage(image, manager: manager, loopCount: loopCount)
+            setGifImage(image, manager: manager, loopCount: loopCount, autoPlay: autoPlay)
         } else {
             manager.deleteImageView(self)
             self.image = image
@@ -40,9 +40,9 @@ public extension UIImageView {
     ///
     /// - Parameter gifImage: The UIImage containing the gif backing data
     /// - Parameter manager: The manager to handle the gif display
-    convenience init(gifImage: UIImage, manager: SwiftyGifManager = .defaultManager, loopCount: Int = -1) {
+    convenience init(gifImage: UIImage, manager: SwiftyGifManager = .defaultManager, loopCount: Int = -1, autoPlay: Bool) {
         self.init()
-        setGifImage(gifImage,manager: manager, loopCount: loopCount)
+        setGifImage(gifImage,manager: manager, loopCount: loopCount, autoPlay: autoPlay)
     }
     
     /// Convenience initializer. Creates a gif holder (defaulted to infinite loop).
@@ -59,7 +59,7 @@ public extension UIImageView {
     /// WARNING : this overwrite any previous gif.
     /// - Parameter gifImage: The UIImage containing the gif backing data
     /// - Parameter loopCount: The number of loops we want for this gif. -1 means infinite.
-    @objc func setGifImage(_ gifImage: UIImage, loopCount: Int = -1) {
+    @objc func setGifImage(_ gifImage: UIImage, loopCount: Int = -1, autoPlay: Bool) {
         if let imageData = gifImage.imageData, (gifImage.imageCount ?? 0) < 1 {
             image = UIImage(data: imageData)
             return
@@ -80,7 +80,9 @@ public extension UIImageView {
             
             if manager.addImageView(self) {
                 startDisplay()
-                startAnimatingGif()
+                if autoPlay {
+                    startAnimatingGif()
+                }
             }
         }
     }
@@ -91,7 +93,7 @@ public extension UIImageView {
     /// - Parameter gifImage: The UIImage containing the gif backing data
     /// - Parameter manager: The manager to handle the gif display
     /// - Parameter loopCount: The number of loops we want for this gif. -1 means infinite.
-    func setGifImage(_ gifImage: UIImage, manager: SwiftyGifManager = .defaultManager, loopCount: Int = -1) {
+    func setGifImage(_ gifImage: UIImage, manager: SwiftyGifManager = .defaultManager, loopCount: Int = -1, autoPlay: Bool) {
         if let imageData = gifImage.imageData, (gifImage.imageCount ?? 0) < 1 {
             image = UIImage(data: imageData)
             return
@@ -110,7 +112,9 @@ public extension UIImageView {
             
             if manager.addImageView(self) {
                 startDisplay()
-                startAnimatingGif()
+                if autoPlay {
+                    startAnimatingGif()
+                }
             }
         }
     }
@@ -218,7 +222,7 @@ public extension UIImageView {
         do {
             let image = try UIImage(gifData: data, levelOfIntegrity: levelOfIntegrity)
             manager.remoteCache[url] = data
-            setGifImage(image, manager: manager, loopCount: loopCount)
+            setGifImage(image, manager: manager, loopCount: loopCount, autoPlay: autoPlay)
             if autoPlay {
                 startAnimatingGif()
             }
