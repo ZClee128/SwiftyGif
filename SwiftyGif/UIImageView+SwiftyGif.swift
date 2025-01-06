@@ -135,7 +135,8 @@ public extension UIImageView {
                        levelOfIntegrity: GifLevelOfIntegrity = .default,
                        session: URLSession = URLSession.shared,
                        showLoader: Bool = true,
-                       customLoader: UIView? = nil) -> URLSessionDataTask? {
+                       customLoader: UIView? = nil,
+                       autoPlay: Bool = true) -> URLSessionDataTask? {
         
         if let data =  manager.remoteCache[url] {
             self.parseDownloadedGif(url: url,
@@ -143,7 +144,7 @@ public extension UIImageView {
                     error: nil,
                     manager: manager,
                     loopCount: loopCount,
-                    levelOfIntegrity: levelOfIntegrity)
+                                    levelOfIntegrity: levelOfIntegrity, autoPlay: autoPlay)
             return nil
         }
         
@@ -165,7 +166,7 @@ public extension UIImageView {
                                         error: error,
                                         manager: manager,
                                         loopCount: loopCount,
-                                        levelOfIntegrity: levelOfIntegrity)
+                                         levelOfIntegrity: levelOfIntegrity, autoPlay: autoPlay)
             }
         }
         
@@ -207,7 +208,8 @@ public extension UIImageView {
                                     error: Error?,
                                     manager: SwiftyGifManager,
                                     loopCount: Int,
-                                    levelOfIntegrity: GifLevelOfIntegrity) {
+                                    levelOfIntegrity: GifLevelOfIntegrity,
+                                    autoPlay: Bool) {
         guard let data = data else {
             report(url: url, error: error)
             return
@@ -217,7 +219,9 @@ public extension UIImageView {
             let image = try UIImage(gifData: data, levelOfIntegrity: levelOfIntegrity)
             manager.remoteCache[url] = data
             setGifImage(image, manager: manager, loopCount: loopCount)
-            startAnimatingGif()
+            if autoPlay {
+                startAnimatingGif()
+            }
             delegate?.gifURLDidFinish?(sender: self, url: url)
         } catch {
             manager.staticGraphCache[url] = data
