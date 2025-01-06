@@ -141,6 +141,8 @@ public extension UIImageView {
                        showLoader: Bool = true,
                        customLoader: UIView? = nil,
                        autoPlay: Bool = true) -> URLSessionDataTask? {
+                       callback: @escaping (Result<Data, Error>) -> Void = {_ in }
+    ) -> URLSessionDataTask? {
         
         if let data =  manager.remoteCache[url] {
             self.parseDownloadedGif(url: url,
@@ -148,13 +150,15 @@ public extension UIImageView {
                     error: nil,
                     manager: manager,
                     loopCount: loopCount,
-                                    levelOfIntegrity: levelOfIntegrity, autoPlay: autoPlay)
+                    levelOfIntegrity: levelOfIntegrity, autoPlay: autoPlay)
             return nil
         }
         
         if let data =  manager.staticGraphCache[url] {
             manager.deleteImageView(self)
             self.image = UIImage(data: data)
+                    levelOfIntegrity: levelOfIntegrity,
+                    callback: callback)
             return nil
         }
         
@@ -171,6 +175,8 @@ public extension UIImageView {
                                         manager: manager,
                                         loopCount: loopCount,
                                          levelOfIntegrity: levelOfIntegrity, autoPlay: autoPlay)
+                                        levelOfIntegrity: levelOfIntegrity,
+                                        callback: callback)
             }
         }
         
@@ -214,8 +220,10 @@ public extension UIImageView {
                                     loopCount: Int,
                                     levelOfIntegrity: GifLevelOfIntegrity,
                                     autoPlay: Bool) {
+                                    callback: (Result<Data, Error>) -> Void) {
         guard let data = data else {
             report(url: url, error: error)
+            callback(.failure(error ?? SwiftyGifError.noGifData))
             return
         }
         
@@ -227,11 +235,16 @@ public extension UIImageView {
                 startAnimatingGif()
             }
             delegate?.gifURLDidFinish?(sender: self, url: url)
+            setGifImage(image, manager: manager, loopCount: loopCount)
+            startAnimatingGif()
+            delegate?.gifURLDidFinish?(sender: self)
+            callback(.success(data))
         } catch {
             manager.staticGraphCache[url] = data
             manager.deleteImageView(self)
             self.image = UIImage(data: data)
             report(url: url, error: error)
+            callback(.failure(error))
         }
     }
     
