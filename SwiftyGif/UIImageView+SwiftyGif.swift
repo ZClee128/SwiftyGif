@@ -24,6 +24,7 @@ public extension UIImageView {
     /// - Parameter loopCount: The number of loops we want for this gif. -1 means infinite.
     func setImage(_ image: UIImage, manager: SwiftyGifManager = .defaultManager, loopCount: Int = -1, autoPlay: Bool = true) {
         if let _ = image.imageData {
+            manager.deleteImageView(self)
             setGifImage(image, manager: manager, loopCount: loopCount, autoPlay: autoPlay)
         } else {
             manager.deleteImageView(self)
@@ -145,6 +146,7 @@ public extension UIImageView {
     ) -> URLSessionDataTask? {
         
         if let data =  manager.remoteCache[url] {
+            manager.deleteImageView(self)
             self.parseDownloadedGif(url: url,
                     data: data,
                     error: nil,
